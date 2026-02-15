@@ -1,5 +1,18 @@
 from rich import print
 
+
+def input_gols(time):
+    while True:
+        try:
+            gols = int(input(f"{time}: "))
+            if gols < 0:
+                print("⚠️ Número inválido. Os gols não podem ser negativos. Digite novamente.")
+            else:
+                return gols
+        except ValueError:
+            print("⚠️ Entrada inválida. Digite um número inteiro.")
+
+            
 def atualiza_pontos(grupo, selecao1, gols1, selecao2, gols2):
     grupo[selecao1]['gm'] += gols1
     grupo[selecao1]['gs'] += gols2
@@ -15,7 +28,7 @@ def atualiza_pontos(grupo, selecao1, gols1, selecao2, gols2):
         grupo[selecao2]['pontos'] += 1
 
 
-def mostrar_pontos(grupo, nome_grupo):
+def mostra_pontos(grupo, nome_grupo):
     print(f"\n[b cyan]{nome_grupo}[/b cyan]")
     print("[bold]SELEÇÃO               P   GM   GS   SG[/bold]")
 
