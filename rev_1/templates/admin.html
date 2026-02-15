@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Interno - Startup Copa</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<h1>Tabela da Copa do Mundo</h1>
+
+<div class="container">
+
+    <div class="card">
+        <h2>Atualizar Placar</h2>
+
+        <form id="placarForm">
+
+            <label>Grupo:</label>
+            <select id="grupo" onchange="carregarGrupo()">
+                <option value="A">Grupo A</option>
+                <option value="B">Grupo B</option>
+                <option value="C">Grupo C</option>
+                <option value="D">Grupo D</option>
+                <option value="E">Grupo E</option>
+                <option value="F">Grupo F</option>
+                <option value="G">Grupo G</option>
+                <option value="H">Grupo H</option>
+            </select>
+
+                <label>Partida:</label>
+                <select id="id_partida"></select>
+
+                <label>Time 1:</label>
+                <select id="time1"></select>
+
+                <label>Gols:</label>
+                <input type="number" id="gols1" required>
+
+                <label>Time 2:</label>
+                <select id="time2"></select>
+
+                <label>Gols:</label>
+                <input type="number" id="gols2" required>
+
+                <button type="submit">Atualizar</button>
+
+        </form>
+    </div>
+
+    <div class="card">
+        <h2>Classificação</h2>
+
+        <select id="grupoClassificacao">
+            <option value="A">Grupo A</option>
+            <option value="B">Grupo B</option>
+            <option value="C">Grupo C</option>
+            <option value="D">Grupo D</option>
+            <option value="E">Grupo E</option>
+            <option value="F">Grupo F</option>
+            <option value="G">Grupo G</option>
+            <option value="H">Grupo H</option>
+        </select>
+
+        <button onclick="carregarClassificacao()">Ver Classificação</button>
+
+        <div id="tabelaClassificacao"></div>
+    </div>
+
+</div>
+
+<script src="{{ url_for('static', filename='admin.js') }}"></script>
+
+</body>
+</html>

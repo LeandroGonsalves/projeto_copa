@@ -1,0 +1,32 @@
+TESTES MÉTODOS
+- POST http://127.0.0.1:5000/api/init
+- GET  http://127.0.0.1:5000/api/classificacao
+- PUT  http://127.0.0.1:5000/api/placar
+
+
+
+ETAPA 0 — API que recebe dados
+
+Objetivo desta etapa: Criar uma API Flask que:
+- Inicializa uma competição
+- Permite registrar gols
+- Recalcula pontos automaticamente
+- Salva tudo em CSV
+- Mantém estado sempre consistente
+
+
+ETAPA 2 - Criar: POST /api/gol
+
+Esse endpoint será responsável por:
+- Carregar competição do CSV
+- Encontrar a partida
+- Atualizar o placar
+- Recalcular pontos imediatamente
+- Salvar novamente no CSV
+- Retornar resposta
+
+
+ETAPA 1.1 — Tela Web 1 (Backoffice)
+- Inserir placar das partidas
+- Visualizar classificação
+- Atualizar automaticamente sem precisar usar Postman
