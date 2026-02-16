@@ -68,3 +68,27 @@ td {
 tr:hover {
     background-color: #222;
 }
+
+.tabs {
+    margin-bottom: 20px;
+}
+
+.tab-btn {
+    padding: 10px 20px;
+    cursor: pointer;
+    border: none;
+    background: #ccc;
+}
+
+.tab-btn.active {
+    background: green;
+    color: white;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}

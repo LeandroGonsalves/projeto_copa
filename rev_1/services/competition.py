@@ -1,66 +1,17 @@
-"""
-Este arquivo contém exclusivamente as regras da competição. Ele é responsável por:
-- Atualizar gols de uma partida
-- Recalcular estatísticas dos times
-- Garantir que o estado fique sempre consistente
-
-Importante:
-Aqui NÃO existe nada de Flask, HTTP nem CSV. Apenas regra de negócio.
-"""
-
-
-def registrar_gol(competicao, grupo, id_partida, selecao):
-    """
-    Esta função recebe:
-    - competicao (dicionário completo carregado do CSV)
-    - grupo (ex: "A")
-    - id_partida (ex: 1)
-    - selecao (ex: "França")
-
-    Ela:
-    - Atualiza o placar da partida
-    - Recalcula todos os pontos do grupo
-    """
-
-    # Acessa o grupo dentro da competição
-    grupo_data = competicao["grupos"][grupo]
-
-    # Percorre as partidas do grupo
-    for partida in grupo_data["partidas"]:
-
-        # Encontra a partida correta pelo ID
-        if partida["id_partida"] == id_partida:
-
-            # Incrementa 1 gol para a seleção informada
-            partida["gols"][selecao] += 1
-
-            break
-
-    # Após atualizar o gol, recalculamos toda a tabela
-    recalcular_tabela(grupo_data)
-
-    return competicao
-
-
 def recalcular_tabela(grupo_data):
-    """
-    Recalcula do zero:
 
-    - Pontos
-    - Gols marcados (gm)
-    - Gols sofridos (gs)
-
-    Isso garante consistência total.
-    """
-
-    # Primeiro zeramos todos os times
+    # Zera todos os times
     for time in grupo_data["times"].values():
         time["pontos"] = 0
         time["gm"] = 0
         time["gs"] = 0
 
-    # Depois percorremos todas as partidas
+    # Percorre partidas
     for partida in grupo_data["partidas"]:
+
+        # 🔒 Se ainda não tem placar, ignora
+        if partida["gols"] is None:
+            continue
 
         time1 = partida["time1"]
         time2 = partida["time2"]
@@ -68,14 +19,14 @@ def recalcular_tabela(grupo_data):
         gols1 = partida["gols"][time1]
         gols2 = partida["gols"][time2]
 
-        # Atualiza gols marcados e sofridos
+        # Gols marcados/sofridos
         grupo_data["times"][time1]["gm"] += gols1
         grupo_data["times"][time1]["gs"] += gols2
 
         grupo_data["times"][time2]["gm"] += gols2
         grupo_data["times"][time2]["gs"] += gols1
 
-        # Atualiza pontos
+        # Pontos
         if gols1 > gols2:
             grupo_data["times"][time1]["pontos"] += 3
         elif gols2 > gols1:
@@ -86,14 +37,28 @@ def recalcular_tabela(grupo_data):
 
 
 def atualizar_placar(competicao, grupo, id_partida, novo_placar):
+
     grupo_data = competicao["grupos"][grupo]
 
-    for partida in grupo_data["partidas"]:
-        if partida["id_partida"] == id_partida:
+    partida = next(
+        (p for p in grupo_data["partidas"] if p["id_partida"] == id_partida),
+        None
+    )
 
-            partida["gols"] = novo_placar
+    if not partida:
+        raise ValueError("Partida não encontrada")
 
-            break
+    time1 = partida["time1"]
+    time2 = partida["time2"]
+
+    gols1 = int(novo_placar.get(time1, 0))
+    gols2 = int(novo_placar.get(time2, 0))
+
+    # 🔥 Aqui criamos o dicionário de gols
+    partida["gols"] = {
+        time1: gols1,
+        time2: gols2
+    }
 
     recalcular_tabela(grupo_data)
 
@@ -101,23 +66,13 @@ def atualizar_placar(competicao, grupo, id_partida, novo_placar):
 
 
 def gerar_classificacao(competicao):
-    """
-    Recebe o dicionário da competição.
-    
-    Percorre todos os grupos e:
-    - Calcula saldo
-    - Ordena os times
-    - Retorna classificação organizada
-    """
 
     resultado = {}
 
-    # Percorre cada grupo da competição
     for nome_grupo, dados_grupo in competicao["grupos"].items():
 
         tabela = []
 
-        # Percorre cada time do grupo
         for nome_time, stats in dados_grupo["times"].items():
 
             saldo = stats["gm"] - stats["gs"]
@@ -130,14 +85,9 @@ def gerar_classificacao(competicao):
                 "saldo": saldo
             })
 
-        # Ordena segundo critérios oficiais
         tabela_ordenada = sorted(
             tabela,
-            key=lambda x: (
-                x["pontos"],
-                x["saldo"],
-                x["gm"]
-            ),
+            key=lambda x: (x["pontos"], x["saldo"], x["gm"]),
             reverse=True
         )
 

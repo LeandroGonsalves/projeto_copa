@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Copa do Mundo - Consulta</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<h1>Classificação da Copa</h1>
+
+<div class="container">
+
+    <!-- Abas -->
+    <div class="tabs">
+        <button class="tab-btn active" data-tab="todos">Todos os Grupos</button>
+        <button class="tab-btn" data-tab="filtrar">Filtrar por Grupo</button>
+    </div>
+
+    <!-- Aba Todos -->
+    <div id="todos" class="tab-content active">
+        <button id="btnTodos">Carregar Todas as Classificações</button>
+        <div id="tabelaTodos"></div>
+    </div>
+
+    <!-- Aba Filtrar -->
+    <div id="filtrar" class="tab-content">
+        <select id="grupoPublico">
+            <option value="A">Grupo A</option>
+            <option value="B">Grupo B</option>
+            <option value="C">Grupo C</option>
+            <option value="D">Grupo D</option>
+            <option value="E">Grupo E</option>
+            <option value="F">Grupo F</option>
+            <option value="G">Grupo G</option>
+            <option value="H">Grupo H</option>
+        </select>
+
+        <button id="btnGrupo">Ver Classificação</button>
+
+        <div id="tabelaGrupo"></div>
+    </div>
+
+</div>
+
+<script src="{{ url_for('static', filename='public.js') }}"></script>
+
+</body>
+</html>

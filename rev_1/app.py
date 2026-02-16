@@ -1,8 +1,6 @@
-"""
-    - POST http://127.0.0.1:5000/api/init
-    - GET  http://127.0.0.1:5000/api/classificacao
-    - PUT  http://127.0.0.1:5000/api/placar
-"""
+# POST http://127.0.0.1:5000/api/init
+# GET  http://127.0.0.1:5000/api/classificacao
+# PUT  http://127.0.0.1:5000/api/placar
 
 from flask import Flask, jsonify, request
 from services.storage import (inicializar_database, carregar_competicao, salvar_competicao)
@@ -15,9 +13,13 @@ from flask import render_template
 app = Flask(__name__)
 
 @app.route("/")
-def home():
-    # Define uma rota simples apenas para testar se o servidor está funcionando
-    return jsonify({"mensagem": "API da Copa está funcionando!"})
+def publico():
+    return render_template("index.html")
+
+
+@app.route("/admin")
+def admin():
+    return render_template("admin.html")
 
 
 @app.route("/api/init", methods=["POST"])
@@ -55,6 +57,10 @@ def atualizar():
         placar
     )
 
+    for gols in placar.values():
+        if gols < 0:
+            return jsonify({"erro": "Gols não podem ser negativos"}), 400
+
     salvar_competicao(
         competicao["id_copa"],
         competicao["competition_name"],
@@ -82,10 +88,6 @@ def classificacao():
     return jsonify(classificacao)
 
 
-@app.route("/admin")
-def admin():
-    return render_template("admin.html")
-
 
 @app.route("/api/grupo/<grupo>", methods=["GET"])
 def obter_grupo(grupo):
@@ -107,6 +109,7 @@ def obter_grupo(grupo):
     for p in grupo_dados["partidas"]:
         partidas.append({
             "id_partida": p["id_partida"],
+            "rodada": p["rodada"],
             "time1": p["time1"],
             "time2": p["time2"]
         })
@@ -115,6 +118,11 @@ def obter_grupo(grupo):
         "times": times,
         "partidas": partidas
     })
+
+
+@app.route("/health-check")
+def health_check():
+    return jsonify({"status": "ok", "message": "API da Copa funcionando"}), 200
 
 
 if __name__ == "__main__":

@@ -15,8 +15,7 @@ Objetivo desta etapa: Criar uma API Flask que:
 - Mantém estado sempre consistente
 
 
-ETAPA 2 - Criar: POST /api/gol
-
+ETAPA 1 - Criar: POST /api/gol
 Esse endpoint será responsável por:
 - Carregar competição do CSV
 - Encontrar a partida
@@ -30,3 +29,10 @@ ETAPA 1.1 — Tela Web 1 (Backoffice)
 - Inserir placar das partidas
 - Visualizar classificação
 - Atualizar automaticamente sem precisar usar Postman
+
+
+ETAPA 1.2 — Tela Web 2
+- Público pode consultar
+- Público NÃO pode alterar placar
+- Interface limpa
+- Sem botão de atualizar

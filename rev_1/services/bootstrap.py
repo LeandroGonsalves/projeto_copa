@@ -1,16 +1,3 @@
-"""
-Arquivo responsável por montar a estrutura inicial da competição.
-
-Aqui definimos:
-- Grupos
-- Seleções
-- Estrutura base
-- Partidas iniciais
-
-Este arquivo pertence à camada de domínio (não HTTP).
-"""
-
-
 def criar_estrutura_inicial():
     """
     Monta toda a estrutura base da competição.
@@ -41,23 +28,59 @@ def criar_estrutura_inicial():
             for selecao in selecoes
         }
 
-        # Criamos partidas automaticamente:
-        # 1º vs 2º
-        # 3º vs 4º
         partidas = [
+            # Rodada 1
             {
                 "id_partida": 1,
+                "rodada": 1,
                 "time1": selecoes[0],
                 "time2": selecoes[1],
-                "gols": {selecoes[0]: 0, selecoes[1]: 0},
-                "status": "em_andamento"
+                "gols": None,
+                "status": "nao_iniciado"
             },
             {
                 "id_partida": 2,
+                "rodada": 1,
                 "time1": selecoes[2],
                 "time2": selecoes[3],
-                "gols": {selecoes[2]: 0, selecoes[3]: 0},
-                "status": "em_andamento"
+                "gols": None,
+                "status": "nao_iniciado"
+            },
+
+            # Rodada 2
+            {
+                "id_partida": 3,
+                "rodada": 2,
+                "time1": selecoes[0],
+                "time2": selecoes[2],
+                "gols": None,
+                "status": "nao_iniciado"
+            },
+            {
+                "id_partida": 4,
+                "rodada": 2,
+                "time1": selecoes[1],
+                "time2": selecoes[3],
+                "gols": None,
+                "status": "nao_iniciado"
+            },
+
+            # Rodada 3
+            {
+                "id_partida": 5,
+                "rodada": 3,
+                "time1": selecoes[0],
+                "time2": selecoes[3],
+                "gols": None,
+                "status": "nao_iniciado"
+            },
+            {
+                "id_partida": 6,
+                "rodada": 3,
+                "time1": selecoes[1],
+                "time2": selecoes[2],
+                "gols": None,
+                "status": "nao_iniciado"
             }
         ]
 

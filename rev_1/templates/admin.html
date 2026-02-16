@@ -29,22 +29,29 @@
                 <option value="H">Grupo H</option>
             </select>
 
-                <label>Partida:</label>
-                <select id="id_partida"></select>
+            <label>Rodada:</label>
+            <select id="rodada">
+                <option value="1">Rodada 1</option>
+                <option value="2">Rodada 2</option>
+                <option value="3">Rodada 3</option>
+            </select>
 
-                <label>Time 1:</label>
-                <select id="time1"></select>
+            <label>Partida:</label>
+            <select id="id_partida"></select>
 
-                <label>Gols:</label>
-                <input type="number" id="gols1" required>
+            <label>Time 1:</label>
+            <select id="time1"></select>
 
-                <label>Time 2:</label>
-                <select id="time2"></select>
+            <label>Gols:</label>
+            <input type="number" id="gols1" min="0" step="1" required>
 
-                <label>Gols:</label>
-                <input type="number" id="gols2" required>
+            <label>Time 2:</label>
+            <select id="time2"></select>
 
-                <button type="submit">Atualizar</button>
+            <label>Gols:</label>
+            <input type="number" id="gols2" min="0" step="1" required>
+
+            <button type="submit">Atualizar</button>
 
         </form>
     </div>

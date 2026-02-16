@@ -1,5 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
 
+    const rodadaSelect = document.getElementById("rodada");
     const grupoSelect = document.getElementById("grupo");
     const partidaSelect = document.getElementById("id_partida");
     const time1Select = document.getElementById("time1");
@@ -7,67 +8,94 @@ document.addEventListener("DOMContentLoaded", function () {
     const form = document.getElementById("placarForm");
     const btnClassificacao = document.getElementById("btnClassificacao");
 
-    // ================================
-    // Carregar grupo ao mudar seleção
-    // ================================
+    let partidasDoGrupo = [];
+
+    // ======================================
+    // CARREGAR GRUPO
+    // ======================================
     grupoSelect.addEventListener("change", carregarGrupo);
 
     function carregarGrupo() {
         const grupo = grupoSelect.value;
 
+        if (!grupo) return;
+
         fetch("/api/grupo/" + grupo)
             .then(res => res.json())
             .then(data => {
-
-                partidaSelect.innerHTML = "";
-                time1Select.innerHTML = "";
-                time2Select.innerHTML = "";
-
-                // Carregar partidas
-                data.partidas.forEach(p => {
-                    const option = document.createElement("option");
-                    option.value = p.id_partida;
-                    option.textContent =
-                        `Partida ${p.id_partida} - ${p.time1} x ${p.time2}`;
-                    partidaSelect.appendChild(option);
-                });
-
-                // Disparar preenchimento automático
-                atualizarTimesDaPartida();
+                partidasDoGrupo = data.partidas || [];
+                carregarPartidasPorRodada();
             });
     }
 
     // ======================================
-    // Atualizar automaticamente time1/time2
+    // CARREGAR PARTIDAS POR RODADA
+    // ======================================
+    rodadaSelect.addEventListener("change", carregarPartidasPorRodada);
+
+    function carregarPartidasPorRodada() {
+
+        const rodada = parseInt(rodadaSelect.value);
+
+        partidaSelect.innerHTML = "";
+        time1Select.innerHTML = "";
+        time2Select.innerHTML = "";
+
+        if (!rodada || partidasDoGrupo.length === 0) return;
+
+        const partidasFiltradas = partidasDoGrupo.filter(
+            p => p.rodada === rodada
+        );
+
+        partidasFiltradas.forEach(p => {
+            const option = document.createElement("option");
+            option.value = p.id_partida;
+            option.textContent =
+                `Partida ${p.id_partida} - ${p.time1} x ${p.time2}`;
+            partidaSelect.appendChild(option);
+        });
+
+        atualizarTimesDaPartida();
+    }
+
+    // ======================================
+    // ATUALIZAR TIMES AUTOMATICAMENTE
     // ======================================
     partidaSelect.addEventListener("change", atualizarTimesDaPartida);
 
     function atualizarTimesDaPartida() {
-        const grupo = grupoSelect.value;
+
         const idPartida = parseInt(partidaSelect.value);
 
-        fetch("/api/grupo/" + grupo)
-            .then(res => res.json())
-            .then(data => {
+        if (!idPartida) return;
 
-                const partida = data.partidas.find(
-                    p => p.id_partida === idPartida
-                );
+        const partida = partidasDoGrupo.find(
+            p => p.id_partida === idPartida
+        );
 
-                if (partida) {
-                    time1Select.innerHTML =
-                        `<option value="${partida.time1}">${partida.time1}</option>`;
-                    time2Select.innerHTML =
-                        `<option value="${partida.time2}">${partida.time2}</option>`;
-                }
-            });
+        if (!partida) return;
+
+        time1Select.innerHTML =
+            `<option value="${partida.time1}">${partida.time1}</option>`;
+
+        time2Select.innerHTML =
+            `<option value="${partida.time2}">${partida.time2}</option>`;
     }
 
-    // ==========================
-    // Enviar atualização placar
-    // ==========================
+    // ======================================
+    // ENVIAR PLACAR
+    // ======================================
     form.addEventListener("submit", function (e) {
         e.preventDefault();
+
+        const gols1 = parseInt(document.getElementById("gols1").value);
+        const gols2 = parseInt(document.getElementById("gols2").value);
+
+        // 🔒 Validação extra de segurança
+        if (gols1 < 0 || gols2 < 0 || isNaN(gols1) || isNaN(gols2)) {
+            alert("Os gols devem ser números inteiros não negativos.");
+            return;
+        }
 
         fetch("/api/placar", {
             method: "PUT",
@@ -76,10 +104,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 grupo: grupoSelect.value,
                 id_partida: parseInt(partidaSelect.value),
                 placar: {
-                    [time1Select.value]:
-                        parseInt(document.getElementById("gols1").value),
-                    [time2Select.value]:
-                        parseInt(document.getElementById("gols2").value)
+                    [time1Select.value]: gols1,
+                    [time2Select.value]: gols2
                 }
             })
         })
@@ -89,9 +115,9 @@ document.addEventListener("DOMContentLoaded", function () {
             });
     });
 
-    // ======================
-    // Carregar Classificação
-    // ======================
+    // ======================================
+    // CLASSIFICAÇÃO
+    // ======================================
     btnClassificacao.addEventListener("click", function () {
 
         fetch("/api/classificacao")
@@ -138,7 +164,9 @@ document.addEventListener("DOMContentLoaded", function () {
             });
     });
 
-    // Carregar automaticamente ao abrir
+    // ======================================
+    // INICIALIZAÇÃO
+    // ======================================
     carregarGrupo();
 
 });
