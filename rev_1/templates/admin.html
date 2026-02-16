@@ -12,13 +12,16 @@
 
 <div class="container">
 
+    <!-- ============================= -->
+    <!-- ATUALIZAR PLACAR - GRUPOS -->
+    <!-- ============================= -->
     <div class="card">
-        <h2>Atualizar Placar</h2>
+        <h2>Atualizar Placar - Fase de Grupos</h2>
 
         <form id="placarForm">
 
             <label>Grupo:</label>
-            <select id="grupo" onchange="carregarGrupo()">
+            <select id="grupo">
                 <option value="A">Grupo A</option>
                 <option value="B">Grupo B</option>
                 <option value="C">Grupo C</option>
@@ -29,6 +32,8 @@
                 <option value="H">Grupo H</option>
             </select>
 
+            <br><br>
+
             <label>Rodada:</label>
             <select id="rodada">
                 <option value="1">Rodada 1</option>
@@ -36,8 +41,12 @@
                 <option value="3">Rodada 3</option>
             </select>
 
+            <br><br>
+
             <label>Partida:</label>
             <select id="id_partida"></select>
+
+            <br><br>
 
             <label>Time 1:</label>
             <select id="time1"></select>
@@ -45,17 +54,25 @@
             <label>Gols:</label>
             <input type="number" id="gols1" min="0" step="1" required>
 
+            <br><br>
+
             <label>Time 2:</label>
             <select id="time2"></select>
 
             <label>Gols:</label>
             <input type="number" id="gols2" min="0" step="1" required>
 
-            <button type="submit">Atualizar</button>
+            <br><br>
+
+            <button type="submit">Atualizar Placar</button>
 
         </form>
     </div>
 
+
+    <!-- ============================= -->
+    <!-- CLASSIFICAÇÃO -->
+    <!-- ============================= -->
     <div class="card">
         <h2>Classificação</h2>
 
@@ -72,8 +89,46 @@
 
         <button id="btnClassificacao">Ver Classificação</button>
 
-
         <div id="tabelaClassificacao"></div>
+    </div>
+
+
+    <!-- ============================= -->
+    <!-- OITAVAS -->
+    <!-- ============================= -->
+    <div class="card">
+        <h2>Atualizar Placar - Oitavas</h2>
+
+        <label>Selecione o Jogo:</label>
+        <select id="selectOitava"></select>
+
+        <br><br>
+
+        <label>Gols Mandante:</label>
+        <input type="number" id="golsMandanteOitava" min="0" step="1">
+
+        <br><br>
+
+        <label>Gols Visitante:</label>
+        <input type="number" id="golsVisitanteOitava" min="0" step="1">
+
+        <br><br>
+
+        <p><strong>Se houver empate, preencher pênaltis:</strong></p>
+
+        <label>Pênaltis Mandante:</label>
+        <input type="number" id="penaltisMandante" min="0" step="1">
+
+        <br><br>
+
+        <label>Pênaltis Visitante:</label>
+        <input type="number" id="penaltisVisitante" min="0" step="1">
+
+        <br><br>
+
+        <button id="btnAtualizarOitava">Atualizar Oitavas</button>
+
+        <div id="tabelaOitavas"></div>
     </div>
 
 </div>

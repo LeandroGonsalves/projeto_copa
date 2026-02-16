@@ -36,3 +36,13 @@ ETAPA 1.2 — Tela Web 2
 - Público NÃO pode alterar placar
 - Interface limpa
 - Sem botão de atualizar
+
+
+ETAPA 2 — Oitavas de Final
+- Criar oitavas de final dinâmicas, baseadas:
+- Na classificação final dos grupos
+- Em uma regra de chaveamento configurável
+- Sem hardcode fixo no código
+
+
+ETAPA 3 - Quartas de Final

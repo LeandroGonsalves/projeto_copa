@@ -94,3 +94,118 @@ def gerar_classificacao(competicao):
         resultado[nome_grupo] = tabela_ordenada
 
     return resultado
+
+
+def gerar_oitavas(classificacao):
+
+    CHAVEAMENTO_OITAVAS = [
+        ("A", 1, "H", 2),
+        ("A", 2, "H", 1),
+        ("B", 1, "G", 2),
+        ("B", 2, "G", 1),
+        ("C", 1, "F", 2),
+        ("C", 2, "F", 1),
+        ("D", 1, "E", 2),
+        ("D", 2, "E", 1),
+    ]
+
+    oitavas = []
+
+    for grupo1, pos1, grupo2, pos2 in CHAVEAMENTO_OITAVAS:
+
+        # 🔥 CORREÇÃO AQUI — usar apenas a letra do grupo
+        if grupo1 not in classificacao or grupo2 not in classificacao:
+            continue
+
+        if len(classificacao[grupo1]) < pos1 or len(classificacao[grupo2]) < pos2:
+            continue
+
+        time1 = classificacao[grupo1][pos1 - 1]["selecao"]
+        time2 = classificacao[grupo2][pos2 - 1]["selecao"]
+
+        jogo = {
+            "id_jogo": len(oitavas) + 1,
+            "mandante": time1,
+            "visitante": time2,
+            "gols_mandante": 0,
+            "gols_visitante": 0,
+            "penaltis_mandante": None,
+            "penaltis_visitante": None,
+            "finalizado": False,
+            "vencedor": None
+        }
+
+        oitavas.append(jogo)
+
+    return oitavas
+
+
+
+def garantir_fase_final(competicao):
+    if "fase_final" not in competicao:
+        competicao["fase_final"] = {
+            "oitavas": []
+        }
+
+
+def atualizar_placar_oitavas(
+    competicao,
+    id_jogo,
+    gols_mandante,
+    gols_visitante,
+    penaltis_mandante=None,
+    penaltis_visitante=None
+):
+
+    if "fase_final" not in competicao:
+        raise ValueError("Fase final ainda não criada")
+
+    jogos = competicao["fase_final"].get("oitavas", [])
+
+    jogo = next((j for j in jogos if j.get("id_jogo") == id_jogo), None)
+
+    if not jogo:
+        raise ValueError("Jogo não encontrado")
+
+    if gols_mandante < 0 or gols_visitante < 0:
+        raise ValueError("Gols não podem ser negativos")
+
+    jogo["gols_mandante"] = gols_mandante
+    jogo["gols_visitante"] = gols_visitante
+
+    # Se houver empate no tempo normal
+    if gols_mandante == gols_visitante:
+
+        if penaltis_mandante is None or penaltis_visitante is None:
+            jogo["finalizado"] = False
+            jogo["vencedor"] = None
+            return competicao
+
+        if penaltis_mandante == penaltis_visitante:
+            raise ValueError("Pênaltis não podem terminar empatados")
+
+        jogo["penaltis_mandante"] = penaltis_mandante
+        jogo["penaltis_visitante"] = penaltis_visitante
+
+        jogo["vencedor"] = (
+            jogo["mandante"]
+            if penaltis_mandante > penaltis_visitante
+            else jogo["visitante"]
+        )
+
+        jogo["finalizado"] = True
+
+    else:
+        # Vitória no tempo normal
+        jogo["penaltis_mandante"] = None
+        jogo["penaltis_visitante"] = None
+
+        jogo["vencedor"] = (
+            jogo["mandante"]
+            if gols_mandante > gols_visitante
+            else jogo["visitante"]
+        )
+
+        jogo["finalizado"] = True
+
+    return competicao
