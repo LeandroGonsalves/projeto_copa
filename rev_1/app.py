@@ -1,18 +1,27 @@
 # POST http://127.0.0.1:5000/api/init
 # GET  http://127.0.0.1:5000/api/classificacao
 # PUT  http://127.0.0.1:5000/api/placar
-
-from flask import Flask, jsonify, request
-from services.storage import (inicializar_database, carregar_competicao, salvar_competicao)
-from services.competition import (atualizar_placar, gerar_classificacao, gerar_oitavas, garantir_fase_final, atualizar_placar_oitavas)
+from flask import Flask, jsonify, request, render_template
+from services.storage import (
+    inicializar_database,
+    carregar_competicao,
+    salvar_competicao
+)
+from services.competition import (
+    atualizar_placar,
+    gerar_classificacao,
+    gerar_oitavas,
+    garantir_fase_final,
+    atualizar_placar_oitavas
+)
 from services.bootstrap import criar_estrutura_inicial
-from flask import render_template
 
-
-# Cria a instância principal da aplicação
 app = Flask(__name__)
 
-quartas = []
+
+# ==============================
+# PÁGINAS
+# ==============================
 
 @app.route("/")
 def publico():
@@ -23,6 +32,10 @@ def publico():
 def admin():
     return render_template("admin.html")
 
+
+# ==============================
+# INICIALIZAÇÃO
+# ==============================
 
 @app.route("/api/init", methods=["POST"])
 def iniciar_competicao():
@@ -39,6 +52,10 @@ def iniciar_competicao():
     return jsonify({"mensagem": "Competição iniciada com sucesso!"})
 
 
+# ==============================
+# FASE DE GRUPOS
+# ==============================
+
 @app.route("/api/placar", methods=["PUT"])
 def atualizar():
     dados = request.json
@@ -46,6 +63,10 @@ def atualizar():
     grupo = dados["grupo"]
     id_partida = dados["id_partida"]
     placar = dados["placar"]
+
+    for gols in placar.values():
+        if gols < 0:
+            return jsonify({"erro": "Gols não podem ser negativos"}), 400
 
     competicao = carregar_competicao()
 
@@ -58,10 +79,6 @@ def atualizar():
         id_partida,
         placar
     )
-
-    for gols in placar.values():
-        if gols < 0:
-            return jsonify({"erro": "Gols não podem ser negativos"}), 400
 
     salvar_competicao(
         competicao["id_copa"],
@@ -84,11 +101,10 @@ def classificacao():
     return jsonify(classificacao)
 
 
-
 @app.route("/api/grupo/<grupo>", methods=["GET"])
 def obter_grupo(grupo):
     competicao = carregar_competicao()
-    
+
     if not competicao:
         return jsonify({"erro": "Nenhuma competição iniciada."}), 400
 
@@ -116,9 +132,12 @@ def obter_grupo(grupo):
     })
 
 
+# ==============================
+# OITAVAS
+# ==============================
+
 @app.route("/admin/gerar-oitavas")
 def gerar_oitavas_admin():
-
     competicao = carregar_competicao()
 
     if not competicao:
@@ -141,23 +160,23 @@ def gerar_oitavas_admin():
     return "Oitavas geradas com sucesso!"
 
 
+@app.route("/api/oitavas", methods=["GET"])
+def listar_oitavas():
+    competicao = carregar_competicao()
+
+    if not competicao:
+        return jsonify({"erro": "Nenhuma competição iniciada."}), 400
+
+    return jsonify(
+        competicao["data"]
+        .get("fase_final", {})
+        .get("oitavas", [])
+    )
+
+
 @app.route("/api/oitavas/placar", methods=["PUT"])
 def atualizar_oitavas():
-
     dados = request.json
-
-    id_jogo = dados["id_jogo"]
-    gols_mandante = int(dados["gols_mandante"])
-    gols_visitante = int(dados["gols_visitante"])
-
-    penaltis_mandante = dados.get("penaltis_mandante")
-    penaltis_visitante = dados.get("penaltis_visitante")
-
-    if penaltis_mandante is not None:
-        penaltis_mandante = int(penaltis_mandante)
-
-    if penaltis_visitante is not None:
-        penaltis_visitante = int(penaltis_visitante)
 
     competicao = carregar_competicao()
 
@@ -167,11 +186,11 @@ def atualizar_oitavas():
     try:
         competicao_atualizada = atualizar_placar_oitavas(
             competicao["data"],
-            id_jogo,
-            gols_mandante,
-            gols_visitante,
-            penaltis_mandante,
-            penaltis_visitante
+            int(dados["id_jogo"]),
+            int(dados["gols_mandante"]),
+            int(dados["gols_visitante"]),
+            dados.get("penaltis_mandante"),
+            dados.get("penaltis_visitante")
         )
     except ValueError as e:
         return jsonify({"erro": str(e)}), 400
@@ -185,28 +204,16 @@ def atualizar_oitavas():
     return jsonify({"mensagem": "Placar das oitavas atualizado!"})
 
 
-@app.route("/api/oitavas", methods=["GET"])
-def listar_oitavas():
+# ==============================
+# QUARTAS
+# ==============================
 
+@app.route("/admin/gerar-quartas")
+def gerar_quartas():
     competicao = carregar_competicao()
 
     if not competicao:
         return jsonify({"erro": "Nenhuma competição iniciada."}), 400
-
-    return jsonify(
-        competicao["data"]
-        .get("fase_final", {})
-        .get("oitavas", [])
-    )
-
-
-@app.route("/admin/gerar-quartas")
-def gerar_quartas():
-
-    competicao = carregar_competicao()
-
-    if not competicao:
-        return {"erro": "Nenhuma competição iniciada."}, 400
 
     data = competicao["data"]
 
@@ -217,13 +224,13 @@ def gerar_quartas():
     )
 
     if not oitavas:
-        return {"erro": "Oitavas ainda não foram geradas."}, 400
+        return jsonify({"erro": "Oitavas ainda não foram geradas."}), 400
 
     vencedores = []
 
     for jogo in oitavas:
         if not jogo.get("vencedor"):
-            return {"erro": "Ainda existem oitavas sem vencedor."}, 400
+            return jsonify({"erro": "Ainda existem oitavas sem vencedor."}), 400
         vencedores.append(jogo["vencedor"])
 
     quartas = []
@@ -249,19 +256,17 @@ def gerar_quartas():
         data
     )
 
-    return {"mensagem": "Quartas de final geradas com sucesso!"}
+    return jsonify({"mensagem": "Quartas de final geradas com sucesso!"})
 
 
-
-@app.route("/api/quartas")
+@app.route("/api/quartas", methods=["GET"])
 def listar_quartas():
-
     competicao = carregar_competicao()
 
     if not competicao:
-        return {"erro": "Nenhuma competição iniciada."}, 400
+        return jsonify({"erro": "Nenhuma competição iniciada."}), 400
 
-    return (
+    return jsonify(
         competicao["data"]
         .get("fase_final", {})
         .get("quartas", [])
@@ -270,11 +275,10 @@ def listar_quartas():
 
 @app.route("/api/quartas/placar", methods=["PUT"])
 def atualizar_quartas():
-
     competicao = carregar_competicao()
 
     if not competicao:
-        return {"erro": "Nenhuma competição iniciada."}, 400
+        return jsonify({"erro": "Nenhuma competição iniciada."}), 400
 
     data = competicao["data"]
 
@@ -284,31 +288,46 @@ def atualizar_quartas():
         .get("quartas", [])
     )
 
+    if not quartas:
+        return jsonify({"erro": "Quartas ainda não geradas."}), 400
+
     req = request.json
-    id_jogo = req.get("id_jogo")
+    id_jogo = int(req.get("id_jogo"))
 
     jogo = next((j for j in quartas if j["id_jogo"] == id_jogo), None)
 
     if not jogo:
-        return {"erro": "Jogo não encontrado."}, 404
+        return jsonify({"erro": "Jogo não encontrado."}), 404
 
-    jogo["gols_mandante"] = req.get("gols_mandante")
-    jogo["gols_visitante"] = req.get("gols_visitante")
-    jogo["penaltis_mandante"] = req.get("penaltis_mandante")
-    jogo["penaltis_visitante"] = req.get("penaltis_visitante")
+    gols_mandante = int(req.get("gols_mandante", 0))
+    gols_visitante = int(req.get("gols_visitante", 0))
 
-    if jogo["gols_mandante"] > jogo["gols_visitante"]:
+    penaltis_mandante = req.get("penaltis_mandante")
+    penaltis_visitante = req.get("penaltis_visitante")
+
+    if penaltis_mandante is not None:
+        penaltis_mandante = int(penaltis_mandante)
+
+    if penaltis_visitante is not None:
+        penaltis_visitante = int(penaltis_visitante)
+
+    jogo["gols_mandante"] = gols_mandante
+    jogo["gols_visitante"] = gols_visitante
+    jogo["penaltis_mandante"] = penaltis_mandante
+    jogo["penaltis_visitante"] = penaltis_visitante
+
+    if gols_mandante > gols_visitante:
         jogo["vencedor"] = jogo["mandante"]
-    elif jogo["gols_visitante"] > jogo["gols_mandante"]:
+    elif gols_visitante > gols_mandante:
         jogo["vencedor"] = jogo["visitante"]
     else:
-        if jogo["penaltis_mandante"] is not None and jogo["penaltis_visitante"] is not None:
-            if int(jogo["penaltis_mandante"]) > int(jogo["penaltis_visitante"]):
-                jogo["vencedor"] = jogo["mandante"]
-            else:
-                jogo["vencedor"] = jogo["visitante"]
+        if penaltis_mandante is None or penaltis_visitante is None:
+            return jsonify({"erro": "Empate exige pênaltis."}), 400
+
+        if penaltis_mandante > penaltis_visitante:
+            jogo["vencedor"] = jogo["mandante"]
         else:
-            return {"erro": "Empate exige pênaltis."}, 400
+            jogo["vencedor"] = jogo["visitante"]
 
     jogo["finalizado"] = True
 
@@ -318,9 +337,14 @@ def atualizar_quartas():
         data
     )
 
-    return {"mensagem": "Quartas atualizadas com sucesso!"}
+    return jsonify({"mensagem": "Quartas atualizadas com sucesso!"})
 
 
+
+
+# ==============================
+# HEALTH CHECK
+# ==============================
 
 @app.route("/health-check")
 def health_check():

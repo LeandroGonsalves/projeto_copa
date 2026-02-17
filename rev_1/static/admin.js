@@ -279,4 +279,61 @@ document.addEventListener("DOMContentLoaded", function () {
     carregarGrupo();
     carregarOitavas();
 
+
+    async function carregarQuartas() {
+
+        const response = await fetch("/api/quartas");
+        const quartas = await response.json();
+
+        const container = document.getElementById("quartas-container");
+        container.innerHTML = "";
+
+        quartas.forEach(jogo => {
+
+            const div = document.createElement("div");
+
+            div.innerHTML = `
+                <hr>
+                <p><strong>${jogo.mandante} x ${jogo.visitante}</strong></p>
+
+                <input type="number" placeholder="Gols ${jogo.mandante}" id="gm_${jogo.id_jogo}">
+                <input type="number" placeholder="Gols ${jogo.visitante}" id="gv_${jogo.id_jogo}">
+                <br>
+                <input type="number" placeholder="Pênaltis ${jogo.mandante}" id="pm_${jogo.id_jogo}">
+                <input type="number" placeholder="Pênaltis ${jogo.visitante}" id="pv_${jogo.id_jogo}">
+                <br>
+                <button onclick="atualizarQuartas(${jogo.id_jogo})">
+                    Atualizar Placar
+                </button>
+            `;
+
+            container.appendChild(div);
+        });
+    }
+
+
+    async function atualizarQuartas(id_jogo) {
+
+        const dados = {
+            id_jogo: id_jogo,
+            gols_mandante: parseInt(document.getElementById(`gm_${id_jogo}`).value),
+            gols_visitante: parseInt(document.getElementById(`gv_${id_jogo}`).value),
+            penaltis_mandante: document.getElementById(`pm_${id_jogo}`).value || null,
+            penaltis_visitante: document.getElementById(`pv_${id_jogo}`).value || null
+        };
+
+        const response = await fetch("/api/quartas/placar", {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(dados)
+        });
+
+        const resultado = await response.json();
+        alert(resultado.mensagem || resultado.erro);
+    }
+
+
+
 });
