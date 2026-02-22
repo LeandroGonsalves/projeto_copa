@@ -1,11 +1,4 @@
 def criar_estrutura_inicial():
-    """
-    Monta toda a estrutura base da competição.
-
-    Retorna:
-        dict: estrutura completa da copa
-    """
-
     grupos = {
         "A": ["França", "Senegal", "Uruguai", "Dinamarca"],
         "B": ["Espanha", "Paraguai", "África do Sul", "Eslovênia"],
