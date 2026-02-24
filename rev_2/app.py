@@ -2,6 +2,7 @@ from flask import Flask, jsonify, request
 from marshmallow import ValidationError
 from schemas import PartidaSchema
 from rich import print
+from funcoes import atualizar_dados_jogo, buscar_partidas, buscar_classificacao, gerar_oitavas
 
 app = Flask(__name__)
 
@@ -9,7 +10,7 @@ schema_partida = PartidaSchema()
 
 
 @app.route("/jogos", methods=["PUT"])
-def rodada1():
+def rodadas():
 
     json_data = request.get_json()
 
@@ -27,12 +28,42 @@ def rodada1():
             "erros": err.messages
         }), 400
 
-    print(dados_validados)
+    #print(dados_validados)
+
+    atualizar_dados_jogo(dados_validados)
 
     return jsonify({
         "success": True,
         "data": dados_validados
     }), 200
+
+
+@app.route("/jogos", methods=["GET"])
+def listar_jogos():
+
+    dados = buscar_partidas()
+    print(dados)
+
+    return jsonify({
+        "success": True,
+        "data": dados
+    }), 200
+
+
+
+@app.route("/classificacao", methods=["GET"])
+def classificacao():
+
+    dados = buscar_classificacao()
+    print(dados)
+
+    gerar_oitavas(dados)
+
+    return jsonify({
+        "success": True,
+        "data": dados
+    }), 200
+
 
 
 @app.route("/health-check")

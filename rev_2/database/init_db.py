@@ -14,4 +14,4 @@ with open(sql_path, "r", encoding="utf-8") as f:
 conn.commit()
 conn.close()
 
-print("✅ Tabela criada com sucesso!")
+print("Tabela criada com sucesso!")
