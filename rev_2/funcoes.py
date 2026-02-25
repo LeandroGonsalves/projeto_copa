@@ -94,25 +94,14 @@ def buscar_classificacao():
     return dados
 
 
-def gerar_oitavas(dados):
+def gerar_segunda_fase(dados):
     conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
 
-    jogo1 = """ insert into dim_partidas values
-    (
-        73, 
-        (select dn.id from vw_classificacao vc where vc.grupo = 'A' and vc.posicao 1 inner join dim_nations dn on vc.nome_pais = dn.nome_pais),
-        (select dn.id from vw_classificacao vc where vc.grupo = 'B' and vc.posicao 2 inner join dim_nations dn on vc.nome_pais = dn.nome_pais),
-        null,
-        oitavas,
-        16:00,
-        2026-06-28
-    )
-    """
+    query = open("database/dim_chaveamento.sql").read()
 
-    cursor.execute(jogo1)
-    resultados = cursor.fetchall()
+    cursor.execute(query)
+    
+    cursor.commit()
     conn.close()
-
-    return resultados
+    
